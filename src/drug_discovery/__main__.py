@@ -1,9 +1,8 @@
-"""CLI: python -m drug_discovery part1 [--skip-fetch]"""
+"""CLI: python -m drug_discovery {part1,part2,part3,part4,part5,all}"""
 
 from __future__ import annotations
 
 import argparse
-import sys
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -25,27 +24,32 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     for name, hint in [
-        ("part2", "Exploratory data analysis (not implemented yet)"),
-        ("part3", "Descriptor calculation (not implemented yet)"),
-        ("part4", "Regression models (not implemented yet)"),
-        ("part5", "Algorithm comparison (not implemented yet)"),
+        ("part2", "Lipinski descriptors, pIC50, Mann-Whitney tests, EDA figures"),
+        ("part3", "Morgan fingerprints and Bemis-Murcko scaffolds"),
+        ("part4", "Random forest: random split vs. scaffold split"),
+        ("part5", "Compare algorithms on a scaffold split"),
     ]:
         sub.add_parser(name, help=hint)
+    run_all = sub.add_parser("all", help="Run parts 1-5 in order")
+    run_all.add_argument("--skip-fetch", action="store_true")
 
     args = parser.parse_args(argv)
 
-    if args.command == "part1":
+    from . import parts
+
+    if args.command in ("part1", "all"):
         from .part1 import run_part1
 
-        run_part1(skip_fetch=args.skip_fetch, search=not args.no_search)
-        return 0
-
-    print(
-        f"{args.command} is scaffolded in notebooks/ but not implemented yet. "
-        "Finish Part 1 first.",
-        file=sys.stderr,
-    )
-    return 1
+        run_part1(skip_fetch=args.skip_fetch, search=not getattr(args, "no_search", False))
+    if args.command in ("part2", "all"):
+        parts.run_part2()
+    if args.command in ("part3", "all"):
+        parts.run_part3()
+    if args.command in ("part4", "all"):
+        parts.run_part4()
+    if args.command in ("part5", "all"):
+        parts.run_part5()
+    return 0
 
 
 if __name__ == "__main__":
