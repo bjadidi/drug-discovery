@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "drug-discovery"
 version = "0.1.0"
-description = "Computational drug discovery pipeline for human acetylcholinesterase inhibitors"
+description = "QSAR pipeline for human acetylcholinesterase inhibitors: ChEMBL curation, fingerprints, scaffold-split model evaluation"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -40,4 +40,5 @@ cdd = "drug_discovery.__main__:main"
 where = ["src"]
 
 [tool.pytest.ini_options]
+pythonpath = ["src"]
 testpaths = ["tests"]

@@ -1,18 +1,31 @@
 # Computational Drug Discovery
 
-End-to-end template for building a machine-learning model of **human acetylcholinesterase (AChE, CHEMBL220)** inhibitors from [ChEMBL](https://www.ebi.ac.uk/chembl/) bioactivity data.
+End-to-end QSAR pipeline that predicts the potency (pIC50) of **human acetylcholinesterase (AChE, CHEMBL220)** inhibitors from [ChEMBL](https://www.ebi.ac.uk/chembl/) bioactivity data. AChE is the target of Alzheimer's drugs such as donepezil.
 
-The workflow follows the classic Computational Drug Discovery series (data collection → EDA → fingerprints → models), but the logic lives in a Python package so notebooks stay thin and each step is rerunnable from the command line.
+The steps follow the classic computational drug discovery workflow (data collection → EDA → fingerprints → models), but with two changes that matter in practice:
+
+* **Everything is a tested Python package**, not a pile of notebooks: each step reruns from the command line, and notebooks only narrate.
+* **Models are judged on a scaffold split** as well as a random split. Holding out whole Bemis–Murcko scaffolds asks "how well do we predict a *new* chemical series?", which a random split overstates because near-duplicate analogues land in both train and test.
+
+RDKit Morgan fingerprints replace the PaDEL Java tool from the original tutorial, so there is no Java dependency.
 
 ## Pipeline
 
 | Part | Notebook | Package entry | Status |
 |------|----------|---------------|--------|
 | 1. Bioactivity data | `notebooks/01_bioactivity_data.ipynb` | `python -m drug_discovery part1` | Implemented |
-| 2. Exploratory data analysis | `notebooks/02_exploratory_data_analysis.ipynb` | `python -m drug_discovery part2` | Template |
-| 3. Descriptor calculation | `notebooks/03_descriptor_calculation.ipynb` | `python -m drug_discovery part3` | Template |
-| 4. Regression models | `notebooks/04_regression_models.ipynb` | `python -m drug_discovery part4` | Template |
-| 5. Compare algorithms | `notebooks/05_compare_algorithms.ipynb` | `python -m drug_discovery part5` | Template |
+| 2. Exploratory data analysis: Lipinski descriptors, pIC50, Mann–Whitney tests | `notebooks/02_exploratory_data_analysis.ipynb` | `python -m drug_discovery part2` | Implemented |
+| 3. Morgan fingerprints and Murcko scaffolds | `notebooks/03_descriptor_calculation.ipynb` | `python -m drug_discovery part3` | Implemented |
+| 4. Random forest: random vs. scaffold split | `notebooks/04_regression_models.ipynb` | `python -m drug_discovery part4` | Implemented |
+| 5. Compare 6 algorithms + mean baseline (scaffold split) | `notebooks/05_compare_algorithms.ipynb` | `python -m drug_discovery part5` | Implemented |
+
+Run everything:
+
+```bash
+python -m drug_discovery all          # downloads ChEMBL data, then parts 2-5
+```
+
+Outputs: curated CSVs in `data/processed/`, fingerprints in `data/descriptors/`, figures in `reports/figures/`, and all metrics in `reports/metrics.json`.
 
 ## Project layout
 
@@ -78,3 +91,5 @@ To point the same pipeline at another protein, edit `src/drug_discovery/config.p
 ```bash
 pytest
 ```
+
+The tests run parts 2–5 end to end on a small offline fixture (real drug-like SMILES with synthetic IC50 values), so CI needs no network access to ChEMBL.
